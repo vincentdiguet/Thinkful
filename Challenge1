@@ -1,0 +1,176 @@
+#Import Tweet.csv
+import pandas as pd
+import numpy as np
+df = pd.read_csv('Tweets.csv')
+#Print first 5 lines
+print(df.head(5))
+#List Column & Format
+print(df.dtypes)
+print(len(df))
+
+
+
+#proportion of tweets with each sentiment
+prop_tweet=pd.pivot_table(df,index=["airline_sentiment"],values=["tweet_id"],aggfunc="count") 
+
+print(prop_tweet)
+
+#Create Pie Chart
+import matplotlib.pyplot as plt
+%matplotlib inline
+color=("red","orange","green")
+explode=(0.1, 0.1, 0.1)
+labels=("negative","neutral","positive")
+patches, texts, autotexts = plt.pie(prop_tweet['tweet_id'], explode=explode,autopct='%1.1f%%', labels=labels,shadow=True, startangle=90, colors=color)
+plt.axis('equal')
+plt.title('Proportion of tweets with each sentiment').set_fontsize(15)
+autotexts[0].set_weight("bold")
+autotexts[0].set_color("White")
+autotexts[1].set_color("White")
+autotexts[2].set_color("White")
+autotexts[0].set_fontsize(15)
+autotexts[1].set_fontsize(15)
+autotexts[2].set_fontsize(15)
+texts[0].set_fontsize(15)
+texts[1].set_fontsize(15)
+texts[2].set_fontsize(15)
+plt.show()
+
+#Number of tweet per airlines
+nb_tweet=pd.pivot_table(df,index=["airline"],values=["tweet_id"],aggfunc="count",) #how do you give a name to the name variable?"
+
+nb_tweet_sort = nb_tweet.sort_values(by='tweet_id', ascending=False)
+print(nb_tweet)
+#Create barchart
+objects = list(nb_tweet_sort.index)
+x_pos = np.arange(len(objects))
+plt.bar(x_pos,nb_tweet_sort['tweet_id'], align='center', color='red', alpha=1)  # alpha just controls the opacity
+
+plt.title('Number of tweet per airlines')
+plt.xticks(x_pos, objects)
+plt.show()
+
+#Number of tweet per airlines per sentiment
+df_trunc1=df[['airline','airline_sentiment','tweet_id']]
+nb_tweet_air=df_trunc1.groupby(['airline','airline_sentiment'])['tweet_id'].count()
+
+# Change: groupby airline and divide by sum
+air_tweet_pcts = nb_tweet_air.groupby(level=0).apply(lambda x:
+                                                 100 * x / float(x.sum()))
+print(air_tweet_pcts)
+
+nb_tweet_sort = nb_tweet.sort_values(by='tweet_id', ascending=False)
+
+#how do you give a name to the name variable?"
+print(nb_tweet_air)
+print(nb_tweet_air.dtypes)
+print(len(nb_tweet_air))
+
+air_tweet_pcts.unstack().sort_values(by='negative',ascending=False).plot(kind='bar',stacked=True,rot=1,figsize=(8,8),title='Number of tweet per airline per sentiment')
+
+plt.show()
+
+#Reason of negative tweet
+
+plt.figure(figsize=(10, 10))
+
+plt.subplot(2, 1, 1)
+
+'''***********************
+    TOTAL AIRLINES
+**********************'''
+
+#Keep only negative tweet
+neg_tweet_1=df.ix[lambda df: df['airline_sentiment'] == "negative" , :]
+
+#pivot reason for negative tweet
+neg_tweet=pd.pivot_table(neg_tweet_1,index=["negativereason"],values=["tweet_id"],aggfunc="count",) 
+
+neg_tweet['perc']= neg_tweet['tweet_id']/neg_tweet['tweet_id'].sum()
+
+
+# Change: groupby airline and divide by sum
+
+neg_tweet_sort = neg_tweet.sort_values(by='tweet_id', ascending=False)
+
+#Create horizontal barchart
+objects = list(neg_tweet_sort.index)
+y_pos = np.arange(len(objects))
+plt.barh(y_pos,neg_tweet_sort['perc'], align='center', color='red', alpha=.5)  # alpha just controls the opacity
+plt.xlim([-0.1, 0.4])
+plt.title('Reason for Negative Tweets')
+plt.yticks(y_pos, objects)
+
+'''***********************
+    TOTAL US AIRWAYS
+**********************'''
+plt.subplot(2, 1, 2)
+#Keep only negative tweet
+neg_tweet_us=neg_tweet_1.ix[lambda neg_tweet: neg_tweet['airline'] == "US Airways" , :]
+
+#pivot reason for negative tweet
+neg_tweet_us=pd.pivot_table(neg_tweet_us,index=["negativereason"],values=["tweet_id"],aggfunc="count",) 
+
+neg_tweet_us['perc']= neg_tweet_us['tweet_id']/neg_tweet_us['tweet_id'].sum()
+
+# Change: groupby airline and divide by sum
+
+neg_tweet_us_sort = neg_tweet_us.sort_values(by='tweet_id', ascending=False)
+
+#Create horizontal barchart
+objects = list(neg_tweet_us_sort.index)
+y_pos = np.arange(len(objects))
+plt.barh(y_pos,neg_tweet_us_sort['perc'], align='center', color='green', alpha=.5)  # alpha just controls the opacity
+plt.xlim([-0.1, 0.4])
+plt.title('Reason for Negative Tweets')
+plt.yticks(y_pos, objects)
+plt.show()
+
+
+'''***********************
+    TOTAL AIRLINES
+**********************'''
+
+#Keep only negative tweet
+neg_tweet_1=df.ix[lambda df: df['airline_sentiment'] == "negative" , :]
+
+#pivot reason for negative tweet
+neg_tweet=pd.pivot_table(neg_tweet_1,index=["negativereason"],values=["tweet_id"],aggfunc="count",) 
+
+neg_tweet['perc']= neg_tweet['tweet_id']/neg_tweet['tweet_id'].sum()
+
+
+# Change: groupby airline and divide by sum
+
+neg_tweet_sort = neg_tweet.sort_values(by='tweet_id', ascending=False)
+
+#Create horizontal barchart
+objects = list(neg_tweet_sort.index)
+y_pos = np.arange(len(objects))
+plt.barh(y_pos,neg_tweet_sort['perc'], align='center', color='green', alpha=.7)  # alpha just controls the opacity
+plt.xlim([-0.1, 0.4])
+plt.yticks(y_pos, objects)
+
+'''***********************
+    TOTAL US AIRWAYS
+**********************'''
+#Keep only negative tweet
+neg_tweet_us=neg_tweet_1.ix[lambda neg_tweet: neg_tweet['airline'] == "US Airways" , :]
+
+#pivot reason for negative tweet
+neg_tweet_us=pd.pivot_table(neg_tweet_us,index=["negativereason"],values=["tweet_id"],aggfunc="count",) 
+
+neg_tweet_us['perc']= neg_tweet_us['tweet_id']/neg_tweet_us['tweet_id'].sum()
+
+# Change: groupby airline and divide by sum
+
+neg_tweet_us_sort = neg_tweet_us.sort_values(by='tweet_id', ascending=False)
+
+#Create horizontal barchart
+objects = list(neg_tweet_us_sort.index)
+y_pos = np.arange(len(objects))
+plt.barh(y_pos,neg_tweet_us_sort['perc'], align='center', color='red', alpha=.7)  # alpha just controls the opacity
+plt.xlim([-0.1, 0.4])
+plt.title('Reason for Negative Tweets')
+plt.yticks(y_pos, objects)
+plt.show()
